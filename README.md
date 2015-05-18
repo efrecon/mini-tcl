@@ -29,3 +29,10 @@ container.
 
 Additionally, the image exports `/opt/data` to place random data that
 you might wish to access from within the container.
+
+## Credits
+
+Thanks to the maintainer of the [Tcl package on
+Alpine](http://pkgs.alpinelinux.org/package/main/x86_64/tcl) to have spent the
+time providing the [tls
+package](http://pkgs.alpinelinux.org/package/testing/x86_64/tls).
