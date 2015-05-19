@@ -1,10 +1,8 @@
-FROM alpine
+FROM alpine:edge
 MAINTAINER Emmanuel Frecon <efrecon@gmail.com>
 
-# Install TCL from the main repo
-RUN apk add --update tcl expect
-# Install TLS from the testing repository, this will move soon
-RUN apk add tls --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
+# Install TCL, TLS and expect (for pure readline) from the main repo
+RUN apk add --update-cache tcl tcl-tls expect
 
 # Now copy all nice scripts from our subdirectory to the root
 COPY scripts/ /scripts/
