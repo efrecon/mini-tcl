@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine
 MAINTAINER Emmanuel Frecon <efrecon@gmail.com>
 
 # Now copy all nice scripts from our subdirectory to the root
