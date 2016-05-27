@@ -1,0 +1,6 @@
+tclsh-service:
+  image: efrecon/mini-tcl
+  entrypoint: /bin/sh
+  command: -c "echo 'puts stderr helloworld' | tclsh8.6"
+  volumes:
+    - ./test:/opt/tcl/lib/test
