@@ -30,6 +30,16 @@ container.
 Additionally, the image exports `/opt/data` to place random data that
 you might wish to access from within the container.
 
+## Versions and Tags
+
+This image tries to follow the release cycle of the
+[official](https://hub.docker.com/_/alpine/) Alpine linux image from docker.
+Available are the following tags:
+
+* 3.3
+* 3.4, latest
+* edge
+
 ## Credits
 
 Thanks to the maintainer of the [Tcl package on
