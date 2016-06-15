@@ -36,13 +36,13 @@ This image tries to follow the release cycle of the
 [official](https://hub.docker.com/_/alpine/) Alpine linux image from docker.
 Available are the following tags:
 
-* 3.3
-* 3.4, latest
-* edge
+* [3.3](https://github.com/efrecon/mini-tcl/blob/master/Dockerfile-3.3)
+* [3.4](https://github.com/efrecon/mini-tcl/blob/master/Dockerfile-3.4), [latest](https://github.com/efrecon/mini-tcl/blob/master/Dockerfile)
+* [edge](https://github.com/efrecon/mini-tcl/blob/master/Dockerfile-edge)
 
 ## Credits
 
 Thanks to the maintainer of the [Tcl package on
 Alpine](http://pkgs.alpinelinux.org/package/main/x86_64/tcl) to have spent the
-time providing the [tls
+time providing the initial [tls
 package](http://pkgs.alpinelinux.org/package/testing/x86_64/tls).
