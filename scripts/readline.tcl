@@ -58,7 +58,7 @@ namespace eval TclReadLine {
     # Initialise our own env variables:
     variable PROMPT ">"
     variable COMPLETION_MATCH ""
-
+    
     # Support extensions to the completion handling
     # which will be called in list order.
     # Initialize with the "open sourced" TCL base handler
@@ -66,21 +66,21 @@ namespace eval TclReadLine {
     variable COMPLETION_HANDLERS [list TclReadLine::handleCompletionBase]
 
     #
-    #  This value was determined by measuring
-    #  a cygwin over ssh.
+    #  This value was determined by measuring 
+    #  a cygwin over ssh. 
     #
     variable READLINE_LATENCY 10 ;# in ms
-
+    
     variable CMDLINE ""
     variable CMDLINE_CURSOR 0
     variable CMDLINE_LINES 0
     variable CMDLINE_PARTIAL
-
+    
     variable ALIASES
     array set ALIASES {}
-
+    
     variable forever 0
-
+    
     # Resource and history files:
     variable HISTORY_SIZE 100
     variable HISTORY_LEVEL 0
@@ -101,7 +101,7 @@ proc TclReadLine::shift {ls} {
 
 proc TclReadLine::readbuf {txt} {
     upvar 1 $txt STRING
-
+    
     set ret [string index $STRING 0]
     set STRING [string range $STRING 1 end]
     return $ret
@@ -132,17 +132,21 @@ proc TclReadLine::clearline {} {
 
 proc TclReadLine::getColumns {} {
     variable COLUMNS
-    set cols 0
+    set cols 80
     if {![catch {stty size} size]} {
         lassign $size rows cols
-    } elseif {![catch {stty -a} err]} {
-        # check for Linux stlye stty output
-        if {[regexp {rows (= )?(\d+); columns (= )?(\d+)} $err - i1 rows i2 cols]} {
-            return [set COLUMNS $cols]
-        }
-        # check for BSD style stty output
-        if {[regexp { (\d+) rows; (\d+) columns;} $err - rows cols]} {
-            return [set COLUMNS $cols]
+    }
+    if { ![string is integer $cols] || ![string is integer $rows] } {
+        set cols 80
+        if {![catch {stty -a} err]} {
+            # check for Linux stlye stty output
+            if {[regexp {rows (= )?(\d+); columns (= )?(\d+)} $err - i1 rows i2 cols]} {
+                return [set COLUMNS $cols]
+            }
+            # check for BSD style stty output
+            if {[regexp { (\d+) rows; (\d+) columns;} $err - rows cols]} {
+                return [set COLUMNS $cols]
+            }
         }
     }
     set COLUMNS $cols
@@ -159,12 +163,12 @@ proc TclReadLine::localInfo {args} {
 }
 
 proc TclReadLine::localPuts {args} {
-
+    
     set l [llength $args]
     if { 3 < $l } {
         return -code error "Error: wrong \# args"
     }
-
+    
     if { 1 < $l } {
         if { [string equal "-nonewline" [lindex $args 0]] } {
             if { 2 < $l } {
@@ -184,7 +188,7 @@ proc TclReadLine::localPuts {args} {
 }
 
 proc TclReadLine::prompt {{txt ""}} {
-
+    
     if { "" != [info var ::tcl_prompt1] } {
         rename ::puts ::_origPuts
         rename TclReadLine::localPuts ::puts
@@ -203,7 +207,7 @@ proc TclReadLine::prompt {{txt ""}} {
     variable CMDLINE_CURSOR
     variable COLUMNS
     foreach {end mid} $CMDLINE_LINES break
-
+    
     # Calculate how many extra lines we need to display.
     # Also calculate cursor position:
     set n -1
@@ -212,7 +216,7 @@ proc TclReadLine::prompt {{txt ""}} {
     set cursorLen [expr {$CMDLINE_CURSOR+[string length $visprompt]}]
     set row 0
     set col 0
-
+    
     # Render output line-by-line to $out then copy back to $txt:
     set found 0
     set out [list]
@@ -223,7 +227,7 @@ proc TclReadLine::prompt {{txt ""}} {
             set cursorLen [expr {$cursorLen - ($totalLen - $len)}]
             set col [expr {$cursorLen % $COLUMNS}]
             set row [expr {$n + ($cursorLen / $COLUMNS) + 1}]
-
+            
             if {$cursorLen >= $len} {
                 set col 0
                 incr row
@@ -239,7 +243,7 @@ proc TclReadLine::prompt {{txt ""}} {
     }
     set txt [join $out "\n"]
     set row [expr {$n-$row}]
-
+    
     # Reserve spaces for display:
     if {$end} {
         if {$mid} {
@@ -252,10 +256,10 @@ proc TclReadLine::prompt {{txt ""}} {
     }
     clearline
     set CMDLINE_LINES $n
-
+    
     # Output line(s):
     print "\r$txt"
-
+    
     if {$row} {
         print "[ESC]\[${row}A" nowait
     }
@@ -277,14 +281,14 @@ proc TclReadLine::print {txt {wait wait}} {
 }
 
 proc TclReadLine::unknown {args} {
-
+    
     set name [lindex $args 0]
     set cmdline $TclReadLine::CMDLINE
     set cmd [string trim [regexp -inline {^\s*[^\s]+} $cmdline]]
     if {[info exists TclReadLine::ALIASES($cmd)]} {
         set cmd [regexp -inline {^\s*[^\s]+} $TclReadLine::ALIASES($cmd)]
     }
-
+    
     set new [auto_execok $name]
     if {$new != ""} {
         set redir ""
@@ -298,7 +302,7 @@ proc TclReadLine::unknown {args} {
         }
         return $ret
     }
-
+    
     uplevel _unknown $args
 }
 
@@ -316,10 +320,10 @@ proc TclReadLine::unalias {word} {
 # Key bindings
 ################################
 proc TclReadLine::handleEscapes {} {
-
+    
     variable CMDLINE
     variable CMDLINE_CURSOR
-
+    
     upvar 1 keybuffer keybuffer
     set seq ""
     set found 0
@@ -377,13 +381,13 @@ proc TclReadLine::handleEscapes {} {
 }
 
 proc TclReadLine::handleControls {} {
-
+    
     variable CMDLINE
     variable CMDLINE_CURSOR
-
+    
     upvar 1 char char
     upvar 1 keybuffer keybuffer
-
+    
     # Control chars start at a == \u0001 and count up.
     switch -exact -- $char {
         \u0001 { ;# ^a
@@ -473,7 +477,7 @@ proc TclReadLine::addCompletionHandler {completion_extension} {
 
 proc TclReadLine::delCompletionHandler {completion_extension} {
     variable COMPLETION_HANDLERS
-    set COMPLETION_HANDLERS [lsearch -all -not -inline $COMPLETION_HANDLERS $completion_extension]
+    set COMPLETION_HANDLERS [lsearch -all -not -inline $COMPLETION_HANDLERS $completion_extension] 
 }
 
 proc TclReadLine::getCompletionHandler {} {
@@ -486,20 +490,20 @@ proc TclReadLine::handleCompletion {} {
     foreach handler $COMPLETION_HANDLERS {
         if {[eval $handler] == 1} {
             break
-        }
+        } 
     }
-    return
+    return 
 }
 
 proc TclReadLine::handleCompletionBase {} {
     variable CMDLINE
     variable CMDLINE_CURSOR
-
+    
     set vars ""
     set cmds ""
     set execs ""
     set files ""
-
+    
     # First find out what kind of word we need to complete:
     set wordstart [string last " " $CMDLINE [expr {$CMDLINE_CURSOR-1}]]
     incr wordstart
@@ -510,18 +514,18 @@ proc TclReadLine::handleCompletionBase {} {
         incr wordend -1
     }
     set word [string range $CMDLINE $wordstart $wordend]
-
+    
     if {[string trim $word] == ""} return
-
+    
     set firstchar [string index $word 0]
-
+    
     # Check if word is a variable:
     if {$firstchar == "\$"} {
         set word [string range $word 1 end]
         incr wordstart
-
+        
         # Check if it is an array key:proc
-
+        
         set x [string first "(" $word]
         if {$x != -1} {
             set v [string range $word 0 [expr {$x-1}]]
@@ -555,7 +559,7 @@ proc TclReadLine::handleCompletionBase {} {
                     foreach f [glob -nocomplain -directory $dir -- $word*] {
                         set exe [string trimleft [string range $f \
                                                       [string length $dir] end] "/"]
-
+                        
                         if {[lsearch -exact $execs $exe] == -1} {
                             lappend execs $exe
                         }
@@ -596,7 +600,7 @@ proc TclReadLine::handleCompletionBase {} {
             }
         }
     }
-
+    
     variable COMPLETION_MATCH
     set maybe [concat $vars $cmds $execs $files]
     set shortest [shortMatch $maybe]
@@ -644,7 +648,7 @@ proc TclReadLine::handleHistory {x} {
     variable CMDLINE
     variable CMDLINE_CURSOR
     variable CMDLINE_PARTIAL
-
+    
     set maxid [expr {[history nextid] - 1}]
     if {$maxid > 0} {
         #
@@ -653,20 +657,20 @@ proc TclReadLine::handleHistory {x} {
         #
         if {$HISTORY_LEVEL == 0} {
             set CMDLINE_PARTIAL $CMDLINE
-        }
+        } 
         incr HISTORY_LEVEL $x
         #
         #  Note:  HISTORY_LEVEL is used to offset into
-        #  the history events.  It will be reset to zero
+        #  the history events.  It will be reset to zero 
         #  when a command is executed by tclline.
-        #
+        #  
         #  Check the three bounds of
         #  1) HISTORY_LEVEL <= 0 - Restore the top level cmd line (not in history stack)
         #  2) HISTORY_LEVEL > HISTORY_SIZE
         #  3) HISTORY_LEVEL > maxid
         #
         if {$HISTORY_LEVEL <= 0} {
-            set HISTORY_LEVEL 0
+            set HISTORY_LEVEL 0 
             if {[info exists CMDLINE_PARTIAL]} {
                 set CMDLINE $CMDLINE_PARTIAL
                 set CMDLINE_CURSOR [string length $CMDLINE]
@@ -676,7 +680,7 @@ proc TclReadLine::handleHistory {x} {
             set HISTORY_LEVEL $maxid
         } elseif {$HISTORY_LEVEL > $HISTORY_SIZE} {
             set HISTORY_LEVEL $HISTORY_SIZE
-        }
+        } 
         set id [expr {($maxid + 1) - $HISTORY_LEVEL}]
         set cmd [expr {$id > $maxid ? "" : [history event $id]}]
         set CMDLINE $cmd
@@ -690,7 +694,7 @@ proc TclReadLine::handleHistory {x} {
 
 proc TclReadLine::getHistory {} {
     variable HISTORY_SIZE
-
+    
     set l [list]
     set e [history nextid]
     set i [expr {$e - $HISTORY_SIZE}]
@@ -727,14 +731,14 @@ proc TclReadLine::lineInput {} {
 
 proc TclReadLine::doExit {{code 0}} {
     variable HISTFILE
-    variable HISTORY_SIZE
+    variable HISTORY_SIZE 
 
     # Reset terminal:
     #print "[ESC]c[ESC]\[2J" nowait
-
+    
     restore ;# restore "info' command -
     lineInput
-
+    
     set hlist [getHistory]
     #
     # Get rid of the TclReadLine::doExit, shouldn't be more than one
@@ -755,7 +759,7 @@ proc TclReadLine::doExit {{code 0}} {
         }
         close $f
     }
-
+    
     exit $code
 }
 
@@ -769,7 +773,7 @@ proc TclReadLine::interact {} {
 
     rename ::unknown ::_unknown
     rename TclReadLine::unknown ::unknown
-
+    
     variable RCFILE
     if {[file exists $RCFILE]} {
         source $RCFILE
@@ -780,7 +784,7 @@ proc TclReadLine::interact {} {
     variable HISTFILE
     variable HISTORY_SIZE
     history keep $HISTORY_SIZE
-
+    
     if {[file exists $HISTFILE]} {
         set f [open $HISTFILE r]
         set hlist [list]
@@ -798,21 +802,21 @@ proc TclReadLine::interact {} {
         unset hlist
         close $f
     }
-
+    
     rawInput
-
+    
     # This is to restore the environment on exit:
     # Do not unalias this!
     alias exit TclReadLine::doExit
-
+    
     variable ThisScript [info script]
-
+    
     tclline ;# emit the first prompt
-
+    
     fileevent stdin readable TclReadLine::tclline
     variable forever
     vwait TclReadLine::forever
-
+    
     restore
 }
 
@@ -827,7 +831,7 @@ proc TclReadLine::check_partial_keyseq {buffer} {
     if {[string index $keybuffer 0] == [ESC]} {
         #
         # Give extra time to read partial key sequences
-        #
+        # 
         set timer  [expr {[clock clicks -milliseconds] + $READLINE_LATENCY}]
         while {[clock clicks -milliseconds] < $timer } {
             append keybuffer [read stdin]
@@ -839,13 +843,13 @@ proc TclReadLine::tclline {} {
     variable COLUMNS
     variable CMDLINE_CURSOR
     variable CMDLINE
-
+    
     set char ""
     set keybuffer [read stdin]
     set COLUMNS [getColumns]
-
+    
     check_partial_keyseq keybuffer
-
+    
     while {$keybuffer != ""} {
         if {[eof stdin]} return
         set char [readbuf keybuffer]
@@ -854,12 +858,12 @@ proc TclReadLine::tclline {} {
             after 40
             continue
         }
-
+        
         if {[string is print $char]} {
             set x $CMDLINE_CURSOR
-
+            
             if {$x < 1 && [string trim $char] == ""} continue
-
+            
             set trailing [string range $CMDLINE $x end]
             set CMDLINE [string replace $CMDLINE $x end]
             append CMDLINE $char
@@ -873,18 +877,18 @@ proc TclReadLine::tclline {} {
                 lineInput
                 print "\n" nowait
                 uplevel \#0 {
-
+                    
                     # Handle aliases:
                     set cmdline $TclReadLine::CMDLINE
                     #
                     # Add the cmd line to history before doing any substitutions
-                    #
+                    # 
                     history add $cmdline
                     set cmd [string trim [regexp -inline {^\s*[^\s]+} $cmdline]]
                     if {[info exists TclReadLine::ALIASES($cmd)]} {
                         regsub -- "(?q)$cmd" $cmdline $TclReadLine::ALIASES($cmd) cmdline
                     }
-
+                    
                     # Perform glob substitutions:
                     set cmdline [string map {
                         "\\*" \0
@@ -905,7 +909,7 @@ proc TclReadLine::tclline {} {
                         foreach {i n} $x break
                         set s [string range $cmdline $i $n]
                         set x [glob -nocomplain -- $s]
-
+                        
                         # If glob can't find anything then don't do
                         # glob substitution, pass * or ~ as literals:
                         if {$x == ""} {
@@ -920,7 +924,7 @@ proc TclReadLine::tclline {} {
                         \0 "*"
                         \1 "~"
                     } $cmdline]
-
+                    
                     rename ::info ::_info
                     rename TclReadLine::localInfo ::info
 
@@ -929,7 +933,7 @@ proc TclReadLine::tclline {} {
                     if {[info exists TclReadLine::CMDLINE_PARTIAL]} {
                         unset TclReadLine::CMDLINE_PARTIAL
                     }
-
+                    
                     # Run the command:
                     set code [catch $cmdline res]
                     rename ::info TclReadLine::localInfo
@@ -939,7 +943,7 @@ proc TclReadLine::tclline {} {
                     } else {
                         TclReadLine::print "$res\n"
                     }
-
+                    
                     set TclReadLine::CMDLINE ""
                     set TclReadLine::CMDLINE_CURSOR 0
                     set TclReadLine::CMDLINE_LINES {0 0}
@@ -947,9 +951,9 @@ proc TclReadLine::tclline {} {
                 rawInput
             } else {
                 set x $CMDLINE_CURSOR
-
+                
                 if {$x < 1 && [string trim $char] == ""} continue
-
+                
                 set trailing [string range $CMDLINE $x end]
                 set CMDLINE [string replace $CMDLINE $x end]
                 append CMDLINE $char
@@ -967,3 +971,9 @@ proc TclReadLine::tclline {} {
 if {!$::tcl_interactive && [info script] eq $::argv0} {
     TclReadLine::interact
 }
+
+# Put the following in your .tclshrc
+#  if {$::tcl_interactive} {
+#    package require TclReadLine
+#    TclReadLine::interact
+#  }
