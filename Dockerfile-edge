@@ -17,6 +17,18 @@ RUN apk add --update-cache tcl tcl-tls expect && \
     rm -rf /var/cache/apk/* && \
     rm -rf /tmp/tcllib*
 
+# tdom compilation and installation
+RUN apk add --no-cache tcl-dev build-base && \
+    /scripts/wsget.tcl http://tdom.org/downloads/tdom-0.9.0-src.tgz /tmp/ && \
+    tar -zx -C  /tmp -f /tmp/tdom-0.9.0-src.tgz && \
+    cd /tmp/tdom-0.9.0/unix && \
+    ../configure && \
+    make && \
+    make install && \
+    cd / && \
+    rm -rf /tmp/tdom-0.9.0* && \
+    apk del build-base tcl-dev
+
 # Export two volumes, one for tcl code and one for data, just in case.
 VOLUME /opt/tcl
 VOLUME /opt/data
